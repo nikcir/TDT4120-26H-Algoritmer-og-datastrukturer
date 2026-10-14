@@ -27,24 +27,37 @@ n_upper = 8
 # hver gang, om verdiene over ikke endres.
 seed = 0
 
-from operator import itemgetter
+# from operator import itemgetter
 import heapq
 
 def build_decision_tree(decisions):
-   # Skriv koden din her
-    #flip tuples and create min head
-    n = len(decisions)
-    decisions = [({letter : ""}, value) for value, letter in decisions]
 
-    heapq.heapify(decisions)
-    for i in range(n-1):
-    
-        smallest_left = heapq.heappop(decisions)
-        smallest_right = heapq.heappop(decisions)
-        smallest_node_freq = smallest_left[1] + smallest_right[1]
-        new_node = # implementer legge sammen dicts med letter paths, og update basert på left eller right med 0 eller 1
-        heapq.heappush(smallest_node_freq)
+    #flip tuples and create min heap
+    heap = [(value, i, {letter : ""}) for i, (letter, value) in enumerate(decisions)]
 
+    # print(decisions)
+    heapq.heapify(heap)
+
+    counter = len(heap)
+    while len(heap) > 1:
+        
+        value1, _, left = heapq.heappop(heap)
+        value2, _, right = heapq.heappop(heap)
+
+        # add 0 and 1 for the left and right chars, infront
+        for k in left:
+            left[k] = "0" + left[k]
+
+        for k in right:
+            right[k] = "1" + right[k]
+
+        left.update(right)
+
+        new_node = (value1+value2, counter, left)     
+        heapq.heappush(heap, new_node)
+
+        counter += 1
+    return heap[0][2]
 
 
 
