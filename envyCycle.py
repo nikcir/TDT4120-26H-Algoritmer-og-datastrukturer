@@ -54,6 +54,7 @@ def detect_envy_cycle(n, values):
         cycle = dfs(agent, [])
         if cycle != None:
             return cycle
+    return None
 
 
     #for agent i values:
