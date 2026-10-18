@@ -28,127 +28,243 @@ n_upper = 5
 seed = 0
 
 
-from collections import deque
+# from collections import deque
+
+# def shortest_road(build_map, start, end):
+
+#     width = len(build_map)
+#     if width == 0:
+#         return None
+
+#     height = len(build_map[0])
+#     if height == 0:
+#         return None
+
+#     heuristic = abs(start[0] - end[0]) + abs(start[1] - end[1])
+
+#     q = deque([(heuristic, start)])
+
+#     parent = {start: None}
+#     costSoFar = {start: 0}
+
+#     neighbours = [(-1, 0), (1, 0), (0, 1), (0, -1)]
+
+#     while q:
+#         # Velg noden med lavest estimert total kostnad
+#         best_index = min(range(len(q)), key=lambda i: q[i][0])
+#         priority, current_node = q[best_index]
+#         del q[best_index]
+
+#         if current_node == end:
+#             path = []
+#             current = end
+
+#             while current is not None:
+#                 path.append(current)
+#                 current = parent[current]
+
+#             path.reverse()
+#             return path
+
+#         for direction in neighbours:
+#             m = (
+#                 direction[0] + current_node[0],
+#                 direction[1] + current_node[1]
+#             )
+
+#             if (
+#                 0 <= m[0] < width
+#                 and 0 <= m[1] < height
+#                 and build_map[m[0]][m[1]]
+#             ):
+#                 newCost = costSoFar[current_node] + 1
+
+#                 if m not in costSoFar or newCost < costSoFar[m]:
+#                     costSoFar[m] = newCost
+#                     heuristic = abs(m[0] - end[0]) + abs(m[1] - end[1])
+#                     q.append((newCost + heuristic, m))
+#                     parent[m] = current_node
+
+#     return None
+
+import heapq
 
 def shortest_road(build_map, start, end):
-
-    q_S_to_E = deque([start])
-    q_E_to_S = deque([end])
 
     width = len(build_map)
     if width == 0:
         return None
-    
+
     height = len(build_map[0])
     if height == 0:
         return None
 
+    heuristic = abs(start[0]-end[0]) + abs(start[1]-end[1])
 
-    kanter = [(1,0),(0,-1),(-1,0),(0,1)]
-    parent_S_to_E = {start:None}
-    parent_E_to_S = {end:None}
+    q = [(heuristic, start)]
+    heapq.heapify(q)
 
-    while q_S_to_E and q_E_to_S:
+    parent = {start:None}
+    costSoFar = {start:0}
 
-        # START TO END PART
-        u_S_to_E = q_S_to_E.popleft()
-        if u_S_to_E == end:
+    neighbours = [(-1,0),(1,0),(0,1),(0,-1)]
+
+    while q:
+        n = heapq.heappop(q)
+
+        if n[0] != costSoFar[n[1]] + abs(n[1][0] - end[0]) + abs(n[1][1] - end[1]):
+            continue
+
+        if n[1] == end:
+        # reconstruct path
             path = []
             current = end
-
-            while current is not None:
-                
+            while current != None:
                 path.append(current)
-                current = parent_S_to_E[current]
-
+                current = parent[current]
+            #list is in wrong order
+            # path.append(start)
             path.reverse()
             return path
-            
-        for kant in kanter:
-            nextNode= (u_S_to_E[0]+kant[0],u_S_to_E[1]+kant[1])
-            if -1 < nextNode[0] < width and -1 < nextNode[1] < height:
+    
+        for direction in neighbours:
+            m = (direction[0]+n[1][0],direction[1]+n[1][1])
 
-
-                if build_map[nextNode[0]][nextNode[1]] and nextNode not in parent_S_to_E:
-
-                    parent_S_to_E[nextNode] = u_S_to_E
-
-                    q_S_to_E.append(nextNode)    
-                                            
-                    ##### CHECK IF FOUND IN BACKWARDS SEARCH
-                    if nextNode in parent_E_to_S:
-                        
-
-                        path = []
-                        current = nextNode
-
-                        # CONSTRUCT PATH FOR FIRST HALF
-                        while current is not None: 
-                            path.append(current)
-                            current = parent_S_to_E[current]
-                        
-                        path.reverse()
-
-                        # CONSTUCT FOR SECOND HALF
-
-                        current = parent_E_to_S[nextNode]
-                        while current is not None:
-                            path.append(current)
-                            current = parent_E_to_S[current]
-
-                        return path
-
-                        
-
-
-
-        # END TO START PART
-        u_E_to_S = q_E_to_S.popleft()
-        if u_E_to_S == start:
-            path = []
-            current = start
-
-            while current is not None:
+            if -1 < m[0] < width and -1 < m[1] < height and build_map[m[0]][m[1]]:
                 
-                path.append(current)
-                current = parent_E_to_S[current]
 
-            path.reverse()
-            return path
-            
-        for kant in kanter:
-            nextNode= (u_E_to_S[0]+kant[0],u_E_to_S[1]+kant[1])
-            if -1 < nextNode[0] < width and -1 < nextNode[1] < height:
 
-                if build_map[nextNode[0]][nextNode[1]] and nextNode not in parent_E_to_S:
-                    parent_E_to_S[nextNode] = u_E_to_S
+                newCost = costSoFar[n[1]] + 1  #old path lenght + 1+
+                if m not in costSoFar or newCost < costSoFar[m]:
+                    costSoFar[m] = newCost
+                    heuristic = abs(m[0]-end[0]) + abs(m[1]-end[1])
+                    heapq.heappush(q,  (newCost + heuristic, m) )
+                    parent[m] = n[1]
 
-                    q_E_to_S.append(nextNode)        
-
-                    ##### CHECK IF FOUND IN FORWARDS SEARCH
-                    if nextNode in parent_S_to_E:
-                        
-                        path = []
-                        current = nextNode
-
-                        # CONSTRUCT PATH FOR FIRST HALF
-                        while current is not None: 
-                            path.append(current)
-                            current = parent_S_to_E[current]
-                        
-                        path.reverse()
-
-                        # CONSTUCT FOR SECOND HALF
-
-                        current = parent_E_to_S[nextNode]
-                        while current is not None:
-                            path.append(current)
-                            current = parent_E_to_S[current]
-
-                        return path
-                    
 
     return None
+
+# from collections import deque
+
+# def shortest_road(build_map, start, end):
+
+#     q_S_to_E = deque([start])
+#     q_E_to_S = deque([end])
+
+#     width = len(build_map)
+#     if width == 0:
+#         return None
+    
+#     height = len(build_map[0])
+#     if height == 0:
+#         return None
+
+
+#     kanter = [(1,0),(0,-1),(-1,0),(0,1)]
+#     parent_S_to_E = {start:None}
+#     parent_E_to_S = {end:None}
+
+#     while q_S_to_E and q_E_to_S:
+
+#         # START TO END PART
+#         u_S_to_E = q_S_to_E.popleft()
+#         if u_S_to_E == end:
+#             path = []
+#             current = end
+
+#             while current is not None:
+                
+#                 path.append(current)
+#                 current = parent_S_to_E[current]
+
+#             path.reverse()
+#             return path
+            
+#         for kant in kanter:
+#             nextNode= (u_S_to_E[0]+kant[0],u_S_to_E[1]+kant[1])
+#             if -1 < nextNode[0] < width and -1 < nextNode[1] < height:
+
+
+#                 if build_map[nextNode[0]][nextNode[1]] and nextNode not in parent_S_to_E:
+
+#                     parent_S_to_E[nextNode] = u_S_to_E
+
+#                     q_S_to_E.append(nextNode)    
+
+#                     ##### CHECK IF FOUND IN BACKWARDS SEARCH
+#                     if nextNode in parent_E_to_S:
+                        
+
+#                         path = []
+#                         current = nextNode
+
+#                         # CONSTRUCT PATH FOR FIRST HALF
+#                         while current is not None: 
+#                             path.append(current)
+#                             current = parent_S_to_E[current]
+                        
+#                         path.reverse()
+
+#                         # CONSTUCT FOR SECOND HALF
+
+#                         current = parent_E_to_S[nextNode]
+#                         while current is not None:
+#                             path.append(current)
+#                             current = parent_E_to_S[current]
+
+#                         return path
+
+                        
+
+
+
+#         # END TO START PART
+#         u_E_to_S = q_E_to_S.popleft()
+#         if u_E_to_S == start:
+#             path = []
+#             current = start
+
+#             while current is not None:
+                
+#                 path.append(current)
+#                 current = parent_E_to_S[current]
+
+#             path.reverse()
+#             return path
+            
+#         for kant in kanter:
+#             nextNode= (u_E_to_S[0]+kant[0],u_E_to_S[1]+kant[1])
+#             if -1 < nextNode[0] < width and -1 < nextNode[1] < height:
+
+#                 if build_map[nextNode[0]][nextNode[1]] and nextNode not in parent_E_to_S:
+#                     parent_E_to_S[nextNode] = u_E_to_S
+
+#                     q_E_to_S.append(nextNode)        
+
+#                     ##### CHECK IF FOUND IN FORWARDS SEARCH
+#                     if nextNode in parent_S_to_E:
+                        
+#                         path = []
+#                         current = nextNode
+
+#                         # CONSTRUCT PATH FOR FIRST HALF
+#                         while current is not None: 
+#                             path.append(current)
+#                             current = parent_S_to_E[current]
+                        
+#                         path.reverse()
+
+#                         # CONSTUCT FOR SECOND HALF
+
+#                         current = parent_E_to_S[nextNode]
+#                         while current is not None:
+#                             path.append(current)
+#                             current = parent_E_to_S[current]
+
+#                         return path
+                    
+
+#     return None
 
 
 # from collections import deque
