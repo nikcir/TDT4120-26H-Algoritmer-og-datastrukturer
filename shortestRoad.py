@@ -71,7 +71,10 @@ def shortest_road(build_map, start, end):
 
                 if build_map[nextNode[0]][nextNode[1]] and nextNode not in parent_S_to_E:
 
-                            
+                    parent_S_to_E[nextNode] = u_S_to_E
+
+                    q_S_to_E.append(nextNode)    
+                                            
                     ##### CHECK IF FOUND IN BACKWARDS SEARCH
                     if nextNode in parent_E_to_S:
                         
@@ -97,9 +100,7 @@ def shortest_road(build_map, start, end):
 
                         
 
-                        parent_S_to_E[nextNode] = u_S_to_E
 
-                        q_S_to_E.append(nextNode)
 
         # END TO START PART
         u_E_to_S = q_E_to_S.popleft()
@@ -120,7 +121,10 @@ def shortest_road(build_map, start, end):
             if -1 < nextNode[0] < width and -1 < nextNode[1] < height:
 
                 if build_map[nextNode[0]][nextNode[1]] and nextNode not in parent_E_to_S:
-                            
+                    parent_E_to_S[nextNode] = u_E_to_S
+
+                    q_E_to_S.append(nextNode)        
+
                     ##### CHECK IF FOUND IN FORWARDS SEARCH
                     if nextNode in parent_S_to_E:
                         
@@ -142,11 +146,7 @@ def shortest_road(build_map, start, end):
                             current = parent_E_to_S[current]
 
                         return path
-
-
-                        parent_E_to_S[nextNode] = u_E_to_S
-
-                        q_E_to_S.append(nextNode)
+                    
 
     return None
 
