@@ -32,47 +32,170 @@ from collections import deque
 
 def shortest_road(build_map, start, end):
 
-   
+    q_S_to_E = deque([start])
+    q_E_to_S = deque([end])
 
     width = len(build_map)
     if width == 0:
         return None
-
+    
     height = len(build_map[0])
     if height == 0:
         return None
 
-    q = deque([start])
-    kanter = [(1,0),(0,-1),(-1,0),(0,1)]
-    # parent = {start:None}
-    parent = [[None] * height for _ in range(width)]
-    parent[start[0]][start[1]] = start
 
-    while q:
-        u = q.popleft()
-        if u == end:
+    kanter = [(1,0),(0,-1),(-1,0),(0,1)]
+    parent_S_to_E = {start:None}
+    parent_E_to_S = {end:None}
+
+    while q_S_to_E and q_E_to_S:
+
+        # START TO END PART
+        u_S_to_E = q_S_to_E.popleft()
+        if u_S_to_E == end:
             path = []
             current = end
 
-            while current != start:
+            while current is not None:
                 
                 path.append(current)
-                current = parent[current[0]][current[1]]
+                current = parent_S_to_E[current]
 
-            path.append(start)
             path.reverse()
             return path
             
         for kant in kanter:
-            nextNode= (u[0]+kant[0],u[1]+kant[1])
+            nextNode= (u_S_to_E[0]+kant[0],u_S_to_E[1]+kant[1])
             if -1 < nextNode[0] < width and -1 < nextNode[1] < height:
-                if build_map[nextNode[0]][nextNode[1]] and parent[nextNode[0]][nextNode[1]] == None:   #nextNode not in parent:
 
-                        parent[nextNode[0]][nextNode[1]] = u
 
-                        q.append(nextNode)
+                if build_map[nextNode[0]][nextNode[1]] and nextNode not in parent_S_to_E:
+
+                            
+                    ##### CHECK IF FOUND IN BACKWARDS SEARCH
+                    if nextNode in parent_E_to_S:
+                        
+
+                        path = []
+                        current = nextNode
+
+                        # CONSTRUCT PATH FOR FIRST HALF
+                        while current is not None: 
+                            path.append(current)
+                            current = parent_S_to_E[current]
+                        
+                        path.reverse()
+
+                        # CONSTUCT FOR SECOND HALF
+
+                        current = parent_E_to_S[nextNode]
+                        while current is not None:
+                            path.append(current)
+                            current = parent_E_to_S[current]
+
+                        return path
+
+                        
+
+                        parent_S_to_E[nextNode] = u_S_to_E
+
+                        q_S_to_E.append(nextNode)
+
+        # END TO START PART
+        u_E_to_S = q_E_to_S.popleft()
+        if u_E_to_S == start:
+            path = []
+            current = start
+
+            while current is not None:
+                
+                path.append(current)
+                current = parent_E_to_S[current]
+
+            path.reverse()
+            return path
+            
+        for kant in kanter:
+            nextNode= (u_E_to_S[0]+kant[0],u_E_to_S[1]+kant[1])
+            if -1 < nextNode[0] < width and -1 < nextNode[1] < height:
+
+                if build_map[nextNode[0]][nextNode[1]] and nextNode not in parent_E_to_S:
+                            
+                    ##### CHECK IF FOUND IN FORWARDS SEARCH
+                    if nextNode in parent_S_to_E:
+                        
+                        path = []
+                        current = nextNode
+
+                        # CONSTRUCT PATH FOR FIRST HALF
+                        while current is not None: 
+                            path.append(current)
+                            current = parent_S_to_E[current]
+                        
+                        path.reverse()
+
+                        # CONSTUCT FOR SECOND HALF
+
+                        current = parent_E_to_S[nextNode]
+                        while current is not None:
+                            path.append(current)
+                            current = parent_E_to_S[current]
+
+                        return path
+
+
+                        parent_E_to_S[nextNode] = u_E_to_S
+
+                        q_E_to_S.append(nextNode)
 
     return None
+
+
+# from collections import deque
+
+# def shortest_road(build_map, start, end):
+
+   
+
+#     width = len(build_map)
+#     if width == 0:
+#         return None
+
+#     height = len(build_map[0])
+#     if height == 0:
+#         return None
+
+#     q = deque([start])
+#     kanter = [(1,0),(0,-1),(-1,0),(0,1)]
+#     # parent = {start:None}
+#     parent = [[None] * height for _ in range(width)]
+#     parent[start[0]][start[1]] = start
+
+#     while q:
+#         u = q.popleft()
+#         if u == end:
+#             path = []
+#             current = end
+
+#             while current != start:
+                
+#                 path.append(current)
+#                 current = parent[current[0]][current[1]]
+
+#             path.append(start)
+#             path.reverse()
+#             return path
+            
+#         for kant in kanter:
+#             nextNode= (u[0]+kant[0],u[1]+kant[1])
+#             if -1 < nextNode[0] < width and -1 < nextNode[1] < height:
+#                 if build_map[nextNode[0]][nextNode[1]] and parent[nextNode[0]][nextNode[1]] == None:   #nextNode not in parent:
+
+#                         parent[nextNode[0]][nextNode[1]] = u
+
+#                         q.append(nextNode)
+
+#     return None
 
 
 # from collections import deque
