@@ -42,7 +42,8 @@ def detect_envy_cycle(n, values):
 
                 cycle = dfs(otherAgent,envyChain)
 
-                return cycle if cycle!=None else None
+                if cycle is not None:
+                    return cycle
 
         envyChain.pop()
 
