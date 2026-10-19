@@ -91,6 +91,12 @@ import heapq
 
 def shortest_road(build_map, start, end):
 
+    if not build_map[start[0]][start[1]]:
+        return None
+
+    if not build_map[end[0]][end[1]]:
+        return None
+
     width = len(build_map)
     if width == 0:
         return None
@@ -101,8 +107,8 @@ def shortest_road(build_map, start, end):
 
     heuristic = abs(start[0]-end[0]) + abs(start[1]-end[1])
 
-    q = [(heuristic, start)]
-    heapq.heapify(q)
+    q = [(heuristic, 0, start)] # (TOTAL ESTIMAT COST, PATH LENGT, COORD)
+    # heapq.heapify(q)
 
     parent = {start:None}
     costSoFar = {start:0}
@@ -112,10 +118,14 @@ def shortest_road(build_map, start, end):
     while q:
         n = heapq.heappop(q)
 
-        if n[0] != costSoFar[n[1]] + abs(n[1][0] - end[0]) + abs(n[1][1] - end[1]):
+        #if the cost is not the optimal one, skip
+        if n[1] != costSoFar[n[2]]:
             continue
 
-        if n[1] == end:
+        # if n[0] != costSoFar[n[1]] + abs(n[1][0] - end[0]) + abs(n[1][1] - end[1]):
+        #     continue
+
+        if n[2] == end:
         # reconstruct path
             path = []
             current = end
@@ -128,21 +138,80 @@ def shortest_road(build_map, start, end):
             return path
     
         for direction in neighbours:
-            m = (direction[0]+n[1][0],direction[1]+n[1][1])
+            m = (direction[0]+n[2][0],direction[1]+n[2][1])
 
             if -1 < m[0] < width and -1 < m[1] < height and build_map[m[0]][m[1]]:
                 
+                  #old path lenght + 1
 
+                newCost = costSoFar[n[2]] + 1
 
-                newCost = costSoFar[n[1]] + 1  #old path lenght + 1+
-                if m not in costSoFar or newCost < costSoFar[m]:
+                if m not in costSoFar or newCost < costSoFar[m]: # or newLenght + m_heuristic < noe:
                     costSoFar[m] = newCost
                     heuristic = abs(m[0]-end[0]) + abs(m[1]-end[1])
-                    heapq.heappush(q,  (newCost + heuristic, m) )
-                    parent[m] = n[1]
+                    TotalEstimantCost = newCost + heuristic 
+                    heapq.heappush(q,  (TotalEstimantCost, newCost, m) )
+                    parent[m] = n[2]
 
 
     return None
+
+# import heapq
+
+# def shortest_road(build_map, start, end):
+
+#     width = len(build_map)
+#     if width == 0:
+#         return None
+
+#     height = len(build_map[0])
+#     if height == 0:
+#         return None
+
+#     heuristic = abs(start[0]-end[0]) + abs(start[1]-end[1])
+
+#     q = [(heuristic, start)]
+#     heapq.heapify(q)
+
+#     parent = {start:None}
+#     costSoFar = {start:0}
+
+#     neighbours = [(-1,0),(1,0),(0,1),(0,-1)]
+
+#     while q:
+#         n = heapq.heappop(q)
+
+#         if n[0] != costSoFar[n[1]] + abs(n[1][0] - end[0]) + abs(n[1][1] - end[1]):
+#             continue
+
+#         if n[1] == end:
+#         # reconstruct path
+#             path = []
+#             current = end
+#             while current != None:
+#                 path.append(current)
+#                 current = parent[current]
+#             #list is in wrong order
+#             # path.append(start)
+#             path.reverse()
+#             return path
+    
+#         for direction in neighbours:
+#             m = (direction[0]+n[1][0],direction[1]+n[1][1])
+
+#             if -1 < m[0] < width and -1 < m[1] < height and build_map[m[0]][m[1]]:
+                
+
+
+#                 newCost = costSoFar[n[1]] + 1  #old path lenght + 1+
+#                 if m not in costSoFar or newCost < costSoFar[m]:
+#                     costSoFar[m] = newCost
+#                     heuristic = abs(m[0]-end[0]) + abs(m[1]-end[1])
+#                     heapq.heappush(q,  (newCost + heuristic, m) )
+#                     parent[m] = n[1]
+
+
+#     return None
 
 # from collections import deque
 
